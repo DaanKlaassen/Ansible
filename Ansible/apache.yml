@@ -1,0 +1,41 @@
+---
+- name: Install Apache on Arch Linux
+  hosts: archlinux
+  become: yes
+
+  tasks:
+    - name: update packets cache
+      pacman:
+        update_cache: yes
+
+    - name: install apache webserver
+      pacman:
+        name: apache
+        state: present
+
+    - name: Start apache and enable on boot
+      systemd:
+        name: httpd
+        enabled: yes
+        state: started
+
+    - name: Install php and required modules
+      pacman:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - php
+        - php-apache
+      register: php_install_result
+
+    - name: Create php info file
+      copy:
+        content: "<?php phpinfo(); ?>"
+        dest: /srv/http/info.php
+      notify: Restart Apache
+
+  handlers:
+    - name: Restart Apache
+      systemd:
+        name: httpd
+        state: restarted

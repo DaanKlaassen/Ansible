@@ -1,0 +1,23 @@
+---
+- name: Install Mariadb on Fedora
+  hosts: fedora
+  become: yes
+  become_user: root
+  
+  tasks:
+    - name: update package repositories
+      dnf:
+        name: '*'
+        state: latest
+
+    - name: Install Mariadb Server
+      dnf:
+        name: mariadb-server
+        state: present
+
+    - name: Start and enable Mariadb
+      systemd:
+          name: mariadb
+          enabled: yes
+          state: started
+
